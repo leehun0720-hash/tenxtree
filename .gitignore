@@ -1,0 +1,13 @@
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# 편집기
+.vscode/
+.idea/
+*.swp
+
+# 원본 대용량 소스 (웹용은 assets/ 에 압축본으로 포함)
+*.mov
+*_3840_2160_*.mp4
