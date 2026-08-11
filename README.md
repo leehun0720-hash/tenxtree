@@ -53,6 +53,35 @@ treehundred.com 실측값을 승계했습니다.
 
 **폰트** — 본문 Pretendard, 라벨·숫자 Montserrat (둘 다 트리헌드레드 자산), 헤드라인 Nanum Myeongjo.
 
+## 모션
+
+GSAP 3.13 + ScrollTrigger (CDN, defer). 총 75개 트리거 중 **스크럽은 6개**이며, 스크럽 대상 속성은
+`transform` · `opacity` · `clip-path` 뿐이라 컴포지터에서 처리됩니다. 강제 스크롤 측정 시 중간값 16.7ms(60fps).
+
+| 구간 | 기법 | 참고 |
+|---|---|---|
+| 히어로 | 단어 마스크 라이즈 + 배경 패럴랙스·스케일 | motion.dev |
+| 전 헤드라인 | 어절 단위 스플릿 후 스태거 라이즈 | motion.dev |
+| 마퀴 | `modifiers` 기반 이음매 없는 무한 루프 | gsap.com |
+| 영상 밴드 | 스크롤에 따라 `clip-path inset` 이 열림 | motion.dev |
+| 사진 | 좌→우 클립 와이프 + 내부 이미지 스케일 아웃 | motion.dev |
+| 100그루 | 중앙에서 퍼지는 10×10 그리드 스태거 | animejs.com |
+| 시너지 여정 | 스크롤 진행선 · 스텝 룰 드로잉 · CSS 3D 틸트 | gsap.com / threejs.org |
+| 참여 방법 | SVG 라인 드로잉 (`stroke-dashoffset`) | animejs.com |
+| 버튼 | `quickTo` 마그네틱 커서 추적 | motion.dev |
+| 네비 | 하강 시 숨김 / 상승 시 노출 | gsap.com |
+
+**three.js는 넣지 않았습니다.** GSAP·Motion 공식 사이트도 홈페이지에 WebGL을 쓰지 않습니다(실측 확인).
+사진 중심 편집 지면에 600KB WebGL을 얹으면 무게 대비 얻는 게 없고, 걷어냈던 "테크 데모" 인상이 돌아옵니다.
+깊이가 필요한 곳(시너지 여정)은 CSS 3D `rotateY` + `transformPerspective` 로 처리했습니다.
+
+### 실패해도 안전한 구조
+
+1. `<html>` 에 `js` 클래스가 붙을 때만 리빌 대상을 숨깁니다 → **JS가 꺼져 있으면 본문이 그대로 보입니다.**
+2. GSAP CDN이 막히면 내장 IntersectionObserver 폴백으로 자동 전환됩니다.
+3. 4초 안에 모션 레이어가 붙지 않으면 `js` 클래스를 제거해 전부 드러냅니다.
+4. `prefers-reduced-motion: reduce` 면 GSAP 경로를 아예 타지 않습니다.
+
 ## 접근성 · 품질
 
 브라우저 실측 기준입니다.

@@ -129,11 +129,75 @@ h2.title.on-dark{color:#fff}
 .btn.ghost-dark{background:transparent;color:#fff;border-color:rgba(255,255,255,.5)}
 .btn.ghost-dark:hover{background:rgba(255,255,255,.12);border-color:#fff}
 
-/* ---- 등장 ---- */
-.rv{opacity:0;transform:translateY(26px);transition:opacity .9s var(--ease),transform .9s var(--ease)}
-.rv.in{opacity:1;transform:none}
-.rv.in .st>*{opacity:1;transform:none}
-.st>*{opacity:0;transform:translateY(18px);transition:opacity .7s var(--ease),transform .7s var(--ease)}
+/* ---- 등장 ----
+   JS가 살아 있을 때만 숨긴다. 스크립트/CDN이 죽어도 본문은 보인다. */
+.rv{transition:opacity .9s var(--ease),transform .9s var(--ease)}
+.js .rv{opacity:0;transform:translateY(26px)}
+.js .rv.in{opacity:1;transform:none}
+.js .rv.in .st>*{opacity:1;transform:none}
+.js .st>*{opacity:0;transform:translateY(18px)}
+.st>*{transition:opacity .7s var(--ease),transform .7s var(--ease)}
+/* GSAP가 잡으면 CSS 트랜지션은 비켜준다 (이중 애니메이션 방지).
+   GSAP가 건드리지 않는 요소는 여기서 다시 보이게 되돌린다. */
+.gsap-on .rv,.gsap-on .st>*{transition:none!important;opacity:1;transform:none}
+
+/* ============================================================
+   MOTION LAYER
+   motion.dev · animejs.com · gsap.com · threejs.org 기법 참고
+   ============================================================ */
+
+/* 단어 마스크 리빌 (motion.dev 의 clip 리빌 + gsap 스태거) */
+.wm{display:inline-block;overflow:hidden;vertical-align:top;padding-bottom:.14em;margin-bottom:-.14em}
+.wm>i{display:inline-block;font-style:inherit;font-weight:inherit;color:inherit;transform-origin:left bottom}
+
+/* 이미지 와이프 리빌 */
+.wipe{overflow:hidden}
+.wipe>img{transform-origin:center}
+
+/* 마퀴 (seamless infinite) */
+.marquee{
+  overflow:hidden;background:var(--forest);color:var(--paper);
+  padding:18px 0;border-top:1px solid rgba(255,255,255,.1);border-bottom:1px solid rgba(255,255,255,.1);
+}
+.marquee-track{display:flex;width:max-content;will-change:transform}
+.marquee-track span{
+  font-family:var(--f-label);font-size:clamp(.78rem,1.5vw,.98rem);font-weight:600;
+  letter-spacing:.2em;text-transform:uppercase;white-space:nowrap;padding:0 clamp(18px,3vw,36px);
+  display:inline-flex;align-items:center;gap:clamp(18px,3vw,36px);
+}
+.marquee-track span::after{content:'';width:5px;height:5px;background:var(--moss);border-radius:50%;flex-shrink:0}
+
+/* 여정 — 스크롤에 따라 그려지는 진행선 (gsap drawSVG 대체) */
+.journey .wrap{position:relative}
+.jprog{
+  display:none;position:absolute;left:-26px;top:0;bottom:0;width:2px;
+  background:rgba(255,255,255,.13);overflow:hidden;
+}
+.jprog i{display:block;width:100%;height:100%;background:var(--moss);transform:scaleY(0);transform-origin:top}
+.step{position:relative}
+.step-rule{
+  position:absolute;left:0;right:0;top:-1px;height:1px;background:var(--moss);
+  transform:scaleX(0);transform-origin:left;
+}
+
+/* 3D 틸트 (three.js 대신 CSS 3D — 무게 없이 깊이만) */
+.tilt{transform-style:preserve-3d}
+
+/* SVG 아이콘 드로잉 (animejs SVG toolset) */
+.way .wi path,.way .wi circle{stroke-dasharray:var(--len,200);stroke-dashoffset:0}
+
+/* 마그네틱 버튼 (motion.dev 스프링 감각) */
+.mag{will-change:transform}
+
+/* 스크롤 시 네비 자동 숨김 */
+.nav{transition:background .4s var(--ease),box-shadow .4s var(--ease),transform .45s var(--ease)}
+.nav.hide{transform:translateY(-100%)}
+
+/* GSAP이 잡는 요소에서 CSS 애니메이션을 걷어낸다 (동일 속성 충돌 방지) */
+.gsap-on .hero-bg img{animation:none}
+.gsap-on .hero h1.up{animation:none;opacity:1;transform:none}
+.gsap-on .tree-field svg{transition:none}
+.gsap-on .marquee-track{will-change:transform}
 .st>*:nth-child(1){transition-delay:.05s}.st>*:nth-child(2){transition-delay:.15s}
 .st>*:nth-child(3){transition-delay:.25s}.st>*:nth-child(4){transition-delay:.35s}
 .st>*:nth-child(5){transition-delay:.45s}.st>*:nth-child(6){transition-delay:.55s}
@@ -507,13 +571,17 @@ h2.title.on-dark{color:#fff}
   .cgrid{grid-template-columns:1fr 1.04fr}
   .ft-top{grid-template-columns:1fr 1.25fr;gap:56px}
   .hero .wrap{padding-bottom:clamp(88px,9vw,128px)}
+  .jprog{display:block}
 }
 
 @media (prefers-reduced-motion:reduce){
   *,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important;scroll-behavior:auto!important}
-  .rv,.st>*,.up{opacity:1!important;transform:none!important}
+  .rv,.st>*,.up,.wm>i{opacity:1!important;transform:none!important}
   .hero-bg img{animation:none;transform:none}
   .tree-field svg{opacity:1;transform:none}
+  .marquee-track{transform:none!important}
+  .jprog i,.step-rule{transform:scaleY(1) scaleX(1)!important}
+  .nav.hide{transform:none!important}
 }
 @media print{
   .nav,.mmenu,.fcard{display:none!important}
@@ -521,6 +589,20 @@ h2.title.on-dark{color:#fff}
   .band::before,.contact::before{background:rgba(255,255,255,.9)}
 }
 </style>
+
+<script>
+  /* 첫 페인트 전에 실행 — JS가 살아 있을 때만 리빌 대상을 숨긴다.
+     스크립트가 죽거나 CDN이 막혀도 본문은 그대로 보인다. */
+  document.documentElement.className += ' js';
+  /* 실패 대비: 4초 안에 모션 레이어가 붙지 않으면 전부 드러낸다. */
+  setTimeout(function () {
+    if (!document.documentElement.classList.contains('motion-ready'))
+      document.documentElement.classList.remove('js');
+  }, 4000);
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/gsap.min.js" defer></script>
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/ScrollTrigger.min.js" defer></script>
 </head>
 <body>
 
@@ -610,6 +692,14 @@ h2.title.on-dark{color:#fff}
     </div>
   </div>
 </section>
+
+<!-- ============ 마퀴 ============ -->
+<div class="marquee" aria-hidden="true">
+  <div class="marquee-track" id="marquee">
+    <span>심고</span><span>기록하고</span><span>증명하고</span><span>다시 심는다</span>
+    <span>One Person, One Hundred Trees</span><span>Green AX Partnership</span>
+  </div>
+</div>
 
 <!-- ============ 영상 밴드 ============ -->
 <section class="vband" id="planet">
@@ -1224,18 +1314,9 @@ h2.title.on-dark{color:#fff}
     secs.forEach(function(s){ no.observe(s); });
   }
 
-  /* ---- 스크롤 등장 ---- */
-  var rvs = document.querySelectorAll('.rv');
-  if (reduce || !('IntersectionObserver' in window)) {
-    [].forEach.call(rvs, function(el){ el.classList.add('in'); });
-  } else {
-    var ro = new IntersectionObserver(function(es){
-      es.forEach(function(e){ if (e.isIntersecting) { e.target.classList.add('in'); ro.unobserve(e.target); } });
-    }, {threshold:.1, rootMargin:'0px 0px -70px 0px'});
-    [].forEach.call(rvs, function(el){ ro.observe(el); });
-  }
-
-  /* ---- 카운터 ---- */
+  /* ---- 리빌 · 카운터 · 100그루 필드 ----
+     GSAP 로드 여부는 DOMContentLoaded 시점에야 알 수 있다(defer 스크립트가 나중에 실행됨).
+     그래서 여기서는 정의만 하고, 실행은 아래 모션 레이어가 결정한다. 이중 적용 방지. */
   var fmt = new Intl.NumberFormat('ko-KR');
   function count(el){
     var to = parseInt(el.getAttribute('data-to'), 10) || 0;
@@ -1253,41 +1334,62 @@ h2.title.on-dark{color:#fff}
     // rAF가 실행되지 않는 환경(백그라운드 탭·프리렌더)에서도 값이 0으로 남지 않도록
     setTimeout(settle, dur + 500);
   }
-  var counters = [].slice.call(document.querySelectorAll('.cnt'));
-  if ('IntersectionObserver' in window) {
-    var co = new IntersectionObserver(function(es){
-      es.forEach(function(e){
-        if (!e.isIntersecting) return;
-        count(e.target); co.unobserve(e.target);
-      });
-    }, {threshold:.6});
-    counters.forEach(function(c){ co.observe(c); });
-  } else counters.forEach(count);
-
-  /* ---- 100그루 필드 ---- */
+  /* 100그루 마크업은 즉시 생성한다 — 레이아웃을 먼저 확정해야
+     ScrollTrigger 위치 계산이 어긋나지 않는다. 점등만 나중에. */
   var field = document.getElementById('treeField');
+  var leaves = [];
   if (field) {
-    var svg = '<svg viewBox="0 0 24 34" fill="currentColor" aria-hidden="true">'
-            + '<path d="M12 1l6 10h-3.4l4.6 8.2h-5.2V33h-4V19.2H4.8L9.4 11H6z"/></svg>';
+    var leafSvg = '<svg viewBox="0 0 24 34" fill="currentColor" aria-hidden="true">'
+                + '<path d="M12 1l6 10h-3.4l4.6 8.2h-5.2V33h-4V19.2H4.8L9.4 11H6z"/></svg>';
     var html = '';
-    for (var i = 0; i < 100; i++) html += svg;
+    for (var i = 0; i < 100; i++) html += leafSvg;
     field.innerHTML = html;
-    var leaves = field.querySelectorAll('svg');
-    if (reduce || !('IntersectionObserver' in window)) {
-      [].forEach.call(leaves, function(l){ l.classList.add('lit'); });
-    } else {
-      var fo = new IntersectionObserver(function(es){
-        es.forEach(function(e){
-          if (!e.isIntersecting) return;
-          fo.unobserve(e.target);
-          [].forEach.call(leaves, function(l, k){ setTimeout(function(){ l.classList.add('lit'); }, k * 16); });
-          // rAF/타이머가 죽어도 최종 상태는 보장
-          setTimeout(function(){ [].forEach.call(leaves, function(l){ l.classList.add('lit'); }); }, 2600);
-        });
-      }, {threshold:.25});
-      fo.observe(field);
-    }
+    leaves = [].slice.call(field.querySelectorAll('svg'));
   }
+
+  /* 모션 레이어가 쓸 재료를 넘긴다 */
+  window.__motion = {
+    reduce: reduce,
+    field: field,
+    leaves: leaves,
+    count: count,
+
+    /* GSAP이 없거나 모션 최소화 설정이면 이 경로로 간다 */
+    fallback: function () {
+      var rvs = document.querySelectorAll('.rv');
+      if (reduce || !('IntersectionObserver' in window)) {
+        [].forEach.call(rvs, function (el) { el.classList.add('in'); });
+      } else {
+        var ro = new IntersectionObserver(function (es) {
+          es.forEach(function (e) { if (e.isIntersecting) { e.target.classList.add('in'); ro.unobserve(e.target); } });
+        }, { threshold: .1, rootMargin: '0px 0px -70px 0px' });
+        [].forEach.call(rvs, function (el) { ro.observe(el); });
+      }
+
+      var counters = [].slice.call(document.querySelectorAll('.cnt'));
+      if ('IntersectionObserver' in window) {
+        var co = new IntersectionObserver(function (es) {
+          es.forEach(function (e) { if (!e.isIntersecting) return; count(e.target); co.unobserve(e.target); });
+        }, { threshold: .6 });
+        counters.forEach(function (c) { co.observe(c); });
+      } else counters.forEach(count);
+
+      if (!field) return;
+      if (reduce || !('IntersectionObserver' in window)) {
+        leaves.forEach(function (l) { l.classList.add('lit'); });
+      } else {
+        var fo = new IntersectionObserver(function (es) {
+          es.forEach(function (e) {
+            if (!e.isIntersecting) return;
+            fo.unobserve(e.target);
+            leaves.forEach(function (l, k) { setTimeout(function () { l.classList.add('lit'); }, k * 16); });
+            setTimeout(function () { leaves.forEach(function (l) { l.classList.add('lit'); }); }, 2600);
+          });
+        }, { threshold: .25 });
+        fo.observe(field);
+      }
+    }
+  };
 
   /* ---- 배경 영상: 화면 안에 있을 때만 재생, 모션 최소화 설정이면 포스터로 정지 ---- */
   var pv = document.getElementById('planetVideo');
@@ -1374,6 +1476,267 @@ h2.title.on-dark{color:#fff}
     }
   });
 })();
+</script>
+
+<script>
+/* ============================================================
+   MOTION LAYER
+   참고: motion.dev(스프링·클립 리빌) / animejs.com(그리드 스태거·SVG 드로잉)
+        gsap.com(ScrollTrigger 스크럽·블렌드) / threejs.org(깊이 — CSS 3D로 대체)
+
+   defer 로 붙은 GSAP은 이 시점(DOMContentLoaded)에 이미 로드돼 있다.
+   없으면 조용히 폴백으로 내려간다. 본문은 어느 경로에서도 보인다.
+   ============================================================ */
+window.addEventListener('DOMContentLoaded', function () {
+  var M = window.__motion || {};
+  var root = document.documentElement;
+  var g = window.gsap, ST = window.ScrollTrigger;
+
+  root.classList.add('motion-ready');
+
+  if (M.reduce || !g || !ST) { if (M.fallback) M.fallback(); return; }
+
+  g.registerPlugin(ST);
+  ST.config({ ignoreMobileResize: true });
+  root.classList.add('gsap-on');
+
+  var EASE = 'power3.out';
+  var noHover = matchMedia('(hover: none)').matches;
+  var nf = new Intl.NumberFormat('ko-KR');
+
+  /* ---------- 단어 단위 마스크 스플리터 ----------
+     국문은 글자 단위로 쪼개면 어절이 깨진다. 공백 기준으로만 나누고
+     <br> 과 <em> 같은 인라인 요소는 그대로 보존한다. */
+  function splitWords(el) {
+    if (!el || el.dataset.split) return [];
+    el.dataset.split = '1';
+    var out = [];
+    (function walk(node) {
+      [].slice.call(node.childNodes).forEach(function (n) {
+        if (n.nodeType === 3) {
+          if (!n.textContent.trim()) return;
+          var frag = document.createDocumentFragment();
+          n.textContent.split(/(\s+)/).forEach(function (p) {
+            if (!p) return;
+            if (/^\s+$/.test(p)) { frag.appendChild(document.createTextNode(p)); return; }
+            var s = document.createElement('span'); s.className = 'wm';
+            var i = document.createElement('i'); i.textContent = p;
+            s.appendChild(i); frag.appendChild(s); out.push(i);
+          });
+          node.replaceChild(frag, n);
+        } else if (n.nodeType === 1 && n.tagName !== 'BR') {
+          walk(n);
+        }
+      });
+    })(el);
+    return out;
+  }
+
+  function riseIn(el, startAt) {
+    var w = splitWords(el);
+    if (!w.length) return false;
+    g.set(w, { yPercent: 118 });
+    g.to(w, {
+      yPercent: 0, duration: .95, stagger: .055, ease: EASE,
+      scrollTrigger: { trigger: el, start: startAt || 'top 86%' }
+    });
+    return true;
+  }
+
+  /* ---------- 히어로 ---------- */
+  var h1 = document.querySelector('.hero h1');
+  if (h1) {
+    var hw = splitWords(h1);
+    g.set(hw, { yPercent: 120 });
+    g.to(hw, { yPercent: 0, duration: 1.15, stagger: .075, ease: 'power4.out', delay: .25 });
+  }
+  g.to('.hero-bg img', {
+    yPercent: 14, scale: 1.15, ease: 'none',
+    scrollTrigger: { trigger: '.hero', start: 'top top', end: 'bottom top', scrub: true }
+  });
+  g.to('.hero .wrap', {
+    yPercent: -12, opacity: .2, ease: 'none',
+    scrollTrigger: { trigger: '.hero', start: 'top top', end: 'bottom top', scrub: true }
+  });
+
+  /* ---------- 헤드라인 라이즈 ---------- */
+  ['h2.title', '.band-quote', '.prologue p:not(.small)', '.cinfo h2', '.journey-out p', '.panel .catch']
+    .forEach(function (sel) { g.utils.toArray(sel).forEach(function (el) { riseIn(el); }); });
+
+  /* ---------- 일반 리빌 ---------- */
+  g.utils.toArray('.rv').forEach(function (el) {
+    var kids = el.querySelectorAll('.st > *');
+    if (kids.length) {
+      g.from(kids, {
+        y: 30, opacity: 0, duration: .85, stagger: .09, ease: EASE,
+        scrollTrigger: { trigger: el, start: 'top 84%' }
+      });
+    } else {
+      // 헤드라인이 이미 라이즈 중인 블록은 y 이동을 겹치지 않게 뺀다
+      var hasSplit = el.querySelector('[data-split]');
+      g.from(el, {
+        y: hasSplit ? 0 : 30, opacity: 0, duration: .9, ease: EASE,
+        scrollTrigger: { trigger: el, start: 'top 86%' }
+      });
+    }
+  });
+
+  /* ---------- 이미지 와이프 (motion.dev 클립 리빌) ---------- */
+  g.utils.toArray('.duo-media, .make-img, .step-media').forEach(function (f) {
+    var img = f.querySelector('img'); if (!img) return;
+    g.timeline({ scrollTrigger: { trigger: f, start: 'top 86%' } })
+      .fromTo(f, { clipPath: 'inset(0% 100% 0% 0%)' },
+                 { clipPath: 'inset(0% 0% 0% 0%)', duration: 1.05, ease: 'power4.inOut' })
+      .fromTo(img, { scale: 1.3 }, { scale: 1, duration: 1.35, ease: 'power3.out' }, 0);
+  });
+
+  /* ---------- 배경 패럴랙스 ---------- */
+  g.utils.toArray('.band .band-bg img').forEach(function (img) {
+    g.fromTo(img, { yPercent: -8 }, {
+      yPercent: 8, ease: 'none',
+      scrollTrigger: { trigger: img.closest('.band'), start: 'top bottom', end: 'bottom top', scrub: true }
+    });
+  });
+
+  /* ---------- 영상 밴드: 스크롤에 따라 열린다 ---------- */
+  var vb = document.querySelector('.vband-bg');
+  if (vb) {
+    g.fromTo(vb, { clipPath: 'inset(16% 12% 16% 12%)' }, {
+      clipPath: 'inset(0% 0% 0% 0%)', ease: 'none',
+      scrollTrigger: { trigger: '.vband', start: 'top bottom', end: 'top 25%', scrub: .6 }
+    });
+  }
+
+  /* ---------- 마퀴 (이음매 없는 무한 루프) ---------- */
+  var mq = document.getElementById('marquee');
+  if (mq) {
+    var guard = 0;
+    while (mq.scrollWidth < window.innerWidth * 2 && guard++ < 6) mq.innerHTML += mq.innerHTML;
+    var half = mq.scrollWidth / 2;
+    if (half > 0) {
+      g.to(mq, {
+        x: -half, duration: Math.max(18, half / 60), ease: 'none', repeat: -1,
+        modifiers: { x: g.utils.unitize(function (x) { return parseFloat(x) % half; }) }
+      });
+    }
+  }
+
+  /* ---------- 100그루: 중앙에서 퍼지는 그리드 스태거 (anime.js 기법) ---------- */
+  if (M.leaves && M.leaves.length && M.field) {
+    g.set(M.leaves, { opacity: .12, scale: .8 });
+    g.to(M.leaves, {
+      opacity: 1, scale: 1, duration: .5, ease: 'back.out(2.4)',
+      stagger: { each: .011, from: 'center', grid: [10, 10] },
+      scrollTrigger: { trigger: M.field, start: 'top 80%' }
+    });
+  }
+
+  /* ---------- 시너지 여정: 진행선 · 스텝 룰 · 3D 틸트 ---------- */
+  var steps = g.utils.toArray('.journey .step');
+  if (steps.length) {
+    var box = steps[0].parentElement;
+    box.style.position = 'relative';
+
+    var prog = document.createElement('div');
+    prog.className = 'jprog';
+    prog.setAttribute('aria-hidden', 'true');
+    prog.innerHTML = '<i></i>';
+    box.appendChild(prog);
+    g.fromTo(prog.firstChild, { scaleY: 0 }, {
+      scaleY: 1, ease: 'none',
+      scrollTrigger: { trigger: box, start: 'top 72%', end: 'bottom 85%', scrub: .5 }
+    });
+
+    steps.forEach(function (s) {
+      var rule = document.createElement('i');
+      rule.className = 'step-rule';
+      rule.setAttribute('aria-hidden', 'true');
+      s.appendChild(rule);
+      g.fromTo(rule, { scaleX: 0 }, {
+        scaleX: 1, duration: 1.15, ease: 'power3.inOut',
+        scrollTrigger: { trigger: s, start: 'top 88%' }
+      });
+
+      // three.js 대신 CSS 3D — 600KB 없이 깊이만 가져온다
+      var media = s.querySelector('.step-media');
+      if (media) {
+        media.classList.add('tilt');
+        g.from(media, {
+          rotateY: s.classList.contains('rev') ? -10 : 10, z: -70,
+          transformPerspective: 1100, transformOrigin: 'center center',
+          duration: 1.2, ease: 'power3.out',
+          scrollTrigger: { trigger: s, start: 'top 86%' }
+        });
+      }
+    });
+  }
+
+  /* ---------- 참여 방법 아이콘: SVG 라인 드로잉 (animejs SVG toolset) ---------- */
+  g.utils.toArray('.way').forEach(function (way) {
+    var svg = way.querySelector('.wi'); if (!svg) return;
+    svg.querySelectorAll('path, circle').forEach(function (p, i) {
+      var len = 0;
+      try { len = p.getTotalLength ? p.getTotalLength() : 0; } catch (e) { return; }
+      if (!len) return;
+      g.set(p, { strokeDasharray: len, strokeDashoffset: len });
+      g.to(p, {
+        strokeDashoffset: 0, duration: 1.3, delay: i * .12, ease: 'power2.inOut',
+        scrollTrigger: { trigger: way, start: 'top 86%' }
+      });
+    });
+  });
+
+  /* ---------- 카운터 ---------- */
+  document.querySelectorAll('.cnt').forEach(function (el) {
+    var to = parseInt(el.getAttribute('data-to'), 10) || 0;
+    var o = { v: 0 };
+    g.to(o, {
+      v: to, duration: 2, ease: 'power3.out',
+      scrollTrigger: { trigger: el, start: 'top 90%' },
+      onUpdate: function () { el.textContent = nf.format(Math.round(o.v)); },
+      onComplete: function () { el.textContent = nf.format(to); }
+    });
+  });
+
+  /* ---------- 마그네틱 버튼 (motion.dev 스프링 감각) ---------- */
+  if (!noHover) {
+    g.utils.toArray('.hero-actions .btn, .fcard .btn, .way .go, .org-link').forEach(function (b) {
+      b.classList.add('mag');
+      var xTo = g.quickTo(b, 'x', { duration: .5, ease: 'power3' });
+      var yTo = g.quickTo(b, 'y', { duration: .5, ease: 'power3' });
+      b.addEventListener('pointermove', function (e) {
+        var r = b.getBoundingClientRect();
+        xTo((e.clientX - (r.left + r.width / 2)) * .25);
+        yTo((e.clientY - (r.top + r.height / 2)) * .38);
+      });
+      b.addEventListener('pointerleave', function () { xTo(0); yTo(0); });
+    });
+  }
+
+  /* ---------- 내려가면 숨고 올라오면 나오는 네비 ---------- */
+  var navEl = document.getElementById('nav');
+  var mm = document.getElementById('mmenu');
+  var lastY = 0;
+  ST.create({
+    start: 0, end: 'max',
+    onUpdate: function (self) {
+      var y = self.scroll();
+      if (!mm.classList.contains('open')) {
+        if (y > 520 && y > lastY + 6) navEl.classList.add('hide');
+        else if (y < lastY - 6 || y < 520) navEl.classList.remove('hide');
+      }
+      lastY = y;
+    }
+  });
+
+  /* ---------- 지연 로드 이미지가 레이아웃을 바꾸므로 트리거를 다시 잰다 ---------- */
+  var rt;
+  function refresh() { clearTimeout(rt); rt = setTimeout(function () { ST.refresh(); }, 220); }
+  window.addEventListener('load', refresh);
+  document.querySelectorAll('img[loading="lazy"]').forEach(function (im) {
+    if (!im.complete) im.addEventListener('load', refresh, { once: true });
+  });
+});
 </script>
 </body>
 </html>
