@@ -575,14 +575,25 @@ h2.title.on-dark{color:#fff}
   .jprog{display:block}
 }
 
+/* OS의 '동작 줄이기'를 존중한다.
+   단, 주소에 ?motion=on 을 붙이면(작성자 미리보기용) 이 블록을 건너뛴다. */
 @media (prefers-reduced-motion:reduce){
-  *,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important;scroll-behavior:auto!important}
-  .rv,.st>*,.up,.wm>i{opacity:1!important;transform:none!important}
-  .hero-bg img{animation:none;transform:none}
-  .tree-field svg{opacity:1;transform:none}
-  .marquee-track{transform:none!important}
-  .jprog i,.step-rule{transform:scaleY(1) scaleX(1)!important}
-  .nav.hide{transform:none!important}
+  html:not(.force-motion) *,
+  html:not(.force-motion) *::before,
+  html:not(.force-motion) *::after{
+    animation-duration:.01ms!important;animation-iteration-count:1!important;
+    transition-duration:.01ms!important;scroll-behavior:auto!important;
+  }
+  html:not(.force-motion) .rv,
+  html:not(.force-motion) .st>*,
+  html:not(.force-motion) .up,
+  html:not(.force-motion) .wm>i{opacity:1!important;transform:none!important}
+  html:not(.force-motion) .hero-bg img{animation:none;transform:none}
+  html:not(.force-motion) .tree-field svg{opacity:1;transform:none}
+  html:not(.force-motion) .marquee-track{transform:none!important}
+  html:not(.force-motion) .jprog i,
+  html:not(.force-motion) .step-rule{transform:scaleY(1) scaleX(1)!important}
+  html:not(.force-motion) .nav.hide{transform:none!important}
 }
 @media print{
   .nav,.mmenu,.fcard{display:none!important}
@@ -595,6 +606,12 @@ h2.title.on-dark{color:#fff}
   /* 첫 페인트 전에 실행 — JS가 살아 있을 때만 리빌 대상을 숨긴다.
      스크립트가 죽거나 CDN이 막혀도 본문은 그대로 보인다. */
   document.documentElement.className += ' js';
+
+  /* 작성자 미리보기용 스위치.
+     OS에서 '애니메이션 효과'를 꺼 둔 환경에서도 주소 뒤에 ?motion=on 을 붙이면
+     모션을 볼 수 있다. 일반 방문자에게는 영향이 없고, OS 설정은 그대로 존중된다. */
+  if (/[?&]motion=on(&|$)/.test(location.search))
+    document.documentElement.className += ' force-motion';
   /* 실패 대비: 4초 안에 모션 레이어가 붙지 않으면 전부 드러낸다. */
   setTimeout(function () {
     if (!document.documentElement.classList.contains('motion-ready'))
@@ -1275,7 +1292,8 @@ h2.title.on-dark{color:#fff}
 <script>
 (function(){
   'use strict';
-  var reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var reduce = matchMedia('(prefers-reduced-motion: reduce)').matches
+               && !document.documentElement.classList.contains('force-motion');
 
   /* 폼 전송 엔드포인트 — 비워두면 메일 클라이언트로 대체 전송 */
   var FORM_ENDPOINT = '';
