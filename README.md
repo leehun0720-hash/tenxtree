@@ -2,7 +2,9 @@
 
 **트리헌드레드 × 텐에이아이 — 그린 AX 파트너십 랜딩페이지**
 
-🌐 **[leehun0720-hash.github.io/tenxtree](https://leehun0720-hash.github.io/tenxtree/)**
+🌐 **[tenxtree.vercel.app](https://tenxtree.vercel.app/)** · 미러: [leehun0720-hash.github.io/tenxtree](https://leehun0720-hash.github.io/tenxtree/)
+
+두 주소 모두 같은 커밋을 서빙합니다. **대표 주소는 Vercel**이며 `canonical`·`og:url`·JSON-LD `url` 이 이쪽을 가리킵니다.
 
 나무를 심는 것은 사람이 하고, 기록하고 증명하는 일은 AI가 합니다.
 사단법인 리본디어스의 트리헌드레드 캠페인과 ㈜텐에이아이의 AI 기술을 잇는 공동사업 소개 페이지입니다.
@@ -100,7 +102,7 @@ GSAP 3.13 + ScrollTrigger (CDN, defer). 총 75개 트리거 중 **스크럽은 6
 | 문의 폼 수신처 | `index.html` 스크립트 상단 `FORM_ENDPOINT` | 비어 있음 → 메일 클라이언트로 대체 전송 |
 | 사진 | 전체 `<img>` | Unsplash 임시 이미지. 실제 활동 사진으로 교체 필요 |
 | OG 이미지 | `<head>` | `og:image` 미설정 (1200×630 필요) |
-| 도메인 | `<link rel="canonical">` | GitHub Pages 주소. 자체 도메인 확정 시 교체 |
+| 도메인 | `<link rel="canonical">` · `og:url` · JSON-LD `url` | Vercel 주소. 자체 도메인 확정 시 세 곳 모두 교체 |
 | 로고 | 헤더·푸터 SVG | 자체 제작 심볼. 공식 로고 확보 시 교체 |
 
 ## 참고
