@@ -87,22 +87,23 @@ GSAP 3.13 + ScrollTrigger (CDN, defer). 총 75개 트리거 중 **스크럽은 6
 1. `<html>` 에 `js` 클래스가 붙을 때만 리빌 대상을 숨깁니다 → **JS가 꺼져 있으면 본문이 그대로 보입니다.**
 2. GSAP CDN이 막히면 내장 IntersectionObserver 폴백으로 자동 전환됩니다.
 3. 4초 안에 모션 레이어가 붙지 않으면 `js` 클래스를 제거해 전부 드러냅니다.
-4. `prefers-reduced-motion: reduce` 면 GSAP 경로를 아예 타지 않습니다.
+### 모션 정책
 
-### 모션이 안 보인다면
+이 사이트는 **OS의 '동작 줄이기' 설정과 무관하게 모든 방문자에게 모션을 재생합니다**
+(사이트 소유자 결정, 2026-08-11).
 
-OS에서 애니메이션 효과를 꺼 두면 브라우저가 `prefers-reduced-motion: reduce` 를 보고하고,
-사이트는 의도대로 모션을 전부 끕니다. **버그가 아니라 설계된 동작입니다.**
+`index.html` `<head>` 안의 스위치 하나로 제어합니다.
 
-- Windows 11 — 설정 → 접근성 → 시각 효과 → **애니메이션 효과** 켜기
-- macOS — 시스템 설정 → 손쉬운 사용 → 디스플레이 → **동작 줄이기** 끄기
-
-OS 설정을 바꾸지 않고 확인만 하려면 주소 뒤에 **`?motion=on`** 을 붙입니다.
-작성자 미리보기용이며 일반 방문자에게는 영향이 없습니다.
-
+```js
+var RESPECT_REDUCED_MOTION = false;   // false = 항상 재생 (현재)
+                                      // true  = OS 설정 존중, ?motion=on 으로 미리보기
 ```
-https://tenxtree.vercel.app/?motion=on
-```
+
+`true` 로 바꾸면 `prefers-reduced-motion: reduce` 인 방문자에게는 GSAP 경로를 태우지 않고,
+관련 CSS 블록(`@media (prefers-reduced-motion:reduce)`)이 다시 활성화됩니다. 코드는 그대로 남겨 두었습니다.
+
+> **참고** — 전정감·멀미가 있는 방문자에게는 큰 폭의 움직임(패럴랙스, 3D 틸트, 무한 마퀴)이
+> 불편할 수 있습니다. 접근성 민원이 들어오면 위 값을 `true` 로 바꾸는 것만으로 즉시 되돌릴 수 있습니다.
 
 ## 접근성 · 품질
 
@@ -112,7 +113,7 @@ https://tenxtree.vercel.app/?motion=on
 - 명암비 자동 감사 (배경 합성 계산) 실패 0건 — WCAG AA
 - 터치 타겟 40px 미만 0개
 - 콘솔 에러 0건
-- `prefers-reduced-motion` 대응 — 애니메이션·영상 정지, 포스터 대체
+- `prefers-reduced-motion` 대응 코드 유지 (현재는 스위치로 꺼 둠 — 위 '모션 정책' 참고)
 - 시맨틱 마크업, skip link, 키보드 내비게이션, JSON-LD 구조화 데이터
 
 ## 설정이 필요한 항목

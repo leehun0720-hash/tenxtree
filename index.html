@@ -603,14 +603,20 @@ h2.title.on-dark{color:#fff}
 </style>
 
 <script>
+  /* ── 모션 정책 ──────────────────────────────────────────────
+     false = OS의 '동작 줄이기' 설정과 무관하게 모든 방문자에게 모션을 재생한다.
+             (사이트 소유자 결정 · 2026-08-11)
+     true  = OS 설정을 존중한다. 이 경우 주소에 ?motion=on 을 붙이면 미리보기 가능.
+
+     되돌리려면 이 값 하나만 true 로 바꾸면 된다. 관련 CSS·JS는 그대로 살아 있다.
+     ──────────────────────────────────────────────────────── */
+  var RESPECT_REDUCED_MOTION = false;
+
   /* 첫 페인트 전에 실행 — JS가 살아 있을 때만 리빌 대상을 숨긴다.
      스크립트가 죽거나 CDN이 막혀도 본문은 그대로 보인다. */
   document.documentElement.className += ' js';
 
-  /* 작성자 미리보기용 스위치.
-     OS에서 '애니메이션 효과'를 꺼 둔 환경에서도 주소 뒤에 ?motion=on 을 붙이면
-     모션을 볼 수 있다. 일반 방문자에게는 영향이 없고, OS 설정은 그대로 존중된다. */
-  if (/[?&]motion=on(&|$)/.test(location.search))
+  if (!RESPECT_REDUCED_MOTION || /[?&]motion=on(&|$)/.test(location.search))
     document.documentElement.className += ' force-motion';
   /* 실패 대비: 4초 안에 모션 레이어가 붙지 않으면 전부 드러낸다. */
   setTimeout(function () {
